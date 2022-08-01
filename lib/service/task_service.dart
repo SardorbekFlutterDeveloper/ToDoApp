@@ -7,6 +7,12 @@ class TodoService {
   Future<void> init() async {
     Hive.registerAdapter(TaskAdapter());
     _tasks = await Hive.openBox("taska");
+
+    await _tasks.clear();
+
+    await _tasks.add(Task("testuser1", "Subscribe to Flutter from Scratch", true));
+
+    await _tasks.add(Task("testuser2", "Comment on the Video", false));
   }
 
   List<Task> getTasks(final String username) {
@@ -24,12 +30,13 @@ class TodoService {
     await taskToRemove.delete();
   }
 
-  Future<void> updateTask(final String task, final String username, {final bool? iscompleted})  async{
+  Future<void> updateTask(final String task, final String username,
+      {final bool? iscompleted}) async {
     final taskToEdit = _tasks.values.firstWhere(
         (element) => element.task == task && element.user == username);
     final index = taskToEdit.key as int;
 
-    await _tasks.put(index, Task(username, task, iscompleted ?? taskToEdit.iscomplated));
-
+    await _tasks.put(
+        index, Task(username, task, iscompleted ?? taskToEdit.iscomplated));
   }
 }

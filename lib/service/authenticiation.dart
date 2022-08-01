@@ -7,7 +7,10 @@ class AuthenticationService {
   Future<void> init() async {
     Hive.registerAdapter(UserAdapter());
 
-    _users = await Hive.openBox("userBox");
+    _users = await Hive.openBox<User>("usersBox");
+    await _users.clear();
+    await _users.add(User('testuser1', "password"));
+    await _users.add(User("testuser2", "password"));
   }
 
   Future<String?> authenticeUser(
@@ -17,7 +20,29 @@ class AuthenticationService {
     if (success) {
       return username;
     } else {
-      return null; 
+      return null;
     }
   }
+
+  UserCreationResult createUser(
+      final String username, final String password) {
+    final alreadyExists = _users.values.any(
+        (element) => element.username.toLowerCase() == username.toLowerCase());
+
+    if (alreadyExists) {
+      return UserCreationResult.alerady_exists;
+    }
+    try {
+      _users.add(User(username, password));
+      return UserCreationResult.success;
+    } on Exception catch (ex) {
+      return UserCreationResult.failure;
+    }
+  }
+}
+
+enum UserCreationResult {
+  success,
+  failure,
+  alerady_exists,
 }
